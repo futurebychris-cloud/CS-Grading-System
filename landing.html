@@ -32,6 +32,15 @@
   button.s { background: #1f242d; color: #e6e9ef; border: 1px solid #2a313d; }
   button:hover { filter: brightness(1.1); }
 
+  .drop {
+    border: 2px dashed #2a313d; border-radius: 8px; padding: 22px; text-align: center;
+    color: #8a93a4; margin-bottom: 12px; cursor: pointer; transition: all .15s;
+  }
+  .drop:hover, .drop.over { border-color: #6aa3ff; color: #e6e9ef; background: #1a2030; }
+  .drop strong { color: #6aa3ff; }
+  .drop input { display: none; }
+  .or { text-align: center; color: #8a93a4; font-size: 12px; margin: 8px 0; }
+
   .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
   .stat {
     flex: 1; min-width: 130px; background: #181b22; border: 1px solid #2a313d;
@@ -88,6 +97,11 @@
 
 <main>
   <div class="panel">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".csv,text/csv">
+      Drop a <strong>.csv</strong> file here, or <strong>click to choose one</strong>
+    </label>
+    <div class="or">— or paste CSV text below —</div>
     <textarea id="csv" placeholder="Paste your gradebook CSV here..."></textarea>
     <button onclick="run()">Load gradebook</button>
     <button class="s" onclick="loadSample()">Load sample</button>
@@ -194,6 +208,22 @@ function run() {
 function stat(label, value) {
   return `<div class="stat"><div class="stat-lbl">${label}</div><div class="stat-val">${value}</div></div>`;
 }
+
+// === File upload (click + drag/drop) ===
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+
+function readFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('csv').value = e.target.result; run(); };
+  reader.readAsText(file);
+}
+
+fileInput.addEventListener('change', e => readFile(e.target.files[0]));
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
 
 // Auto-load sample on page open
 loadSample();
