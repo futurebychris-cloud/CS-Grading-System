@@ -9,13 +9,10 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: #0f1115; color: #e6e9ef; margin: 0; min-height: 100vh;
   }
-  header {
-    padding: 22px 32px; border-bottom: 1px solid #2a313d;
-  }
+  header { padding: 22px 32px; border-bottom: 1px solid #2a313d; }
   header h1 { margin: 0; font-size: 20px; }
   header p { margin: 4px 0 0; color: #8a93a4; font-size: 13px; }
   main { padding: 24px 32px 64px; max-width: 1400px; margin: 0 auto; }
-
   .panel {
     background: #181b22; border: 1px solid #2a313d; border-radius: 10px;
     padding: 18px; margin-bottom: 22px;
@@ -31,7 +28,6 @@
   }
   button.s { background: #1f242d; color: #e6e9ef; border: 1px solid #2a313d; }
   button:hover { filter: brightness(1.1); }
-
   .drop {
     border: 2px dashed #2a313d; border-radius: 8px; padding: 22px; text-align: center;
     color: #8a93a4; margin-bottom: 12px; cursor: pointer; transition: all .15s;
@@ -40,7 +36,6 @@
   .drop strong { color: #6aa3ff; }
   .drop input { display: none; }
   .or { text-align: center; color: #8a93a4; font-size: 12px; margin: 8px 0; }
-
   .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
   .stat {
     flex: 1; min-width: 130px; background: #181b22; border: 1px solid #2a313d;
@@ -48,7 +43,11 @@
   }
   .stat-lbl { color: #8a93a4; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
   .stat-val { font-size: 22px; font-weight: 600; margin-top: 4px; }
-
+  .layout-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    background: #1a2030; border: 1px solid #6aa3ff; color: #6aa3ff;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-left: 8px;
+  }
   .table-wrap { background: #181b22; border: 1px solid #2a313d; border-radius: 10px; overflow: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
@@ -64,7 +63,6 @@
   }
   tbody tr:hover { background: rgba(106,163,255,.05); }
   tbody td.sid { font-weight: 600; text-align: left; background: #1f242d; }
-
   .g {
     display: inline-block; min-width: 32px; padding: 4px 8px; border-radius: 4px;
     font-weight: 600; font-size: 12px; color: #0a0d12;
@@ -74,7 +72,6 @@
   .D  { background: #f5b14a; }
   .NY { background: #e25555; color: #fff; }
   .blank { background: #4a5160; color: #8a93a4; }
-
   .final-cell { background: #1a2030; border-left: 2px solid #6aa3ff !important; }
   .final {
     display: inline-block; min-width: 38px; padding: 5px 10px; border-radius: 6px;
@@ -86,15 +83,14 @@
   .fD { background: #e88c4a; }
   .fF { background: #e25555; color: #fff; }
   .score { display: block; font-size: 10px; color: #8a93a4; margin-top: 3px; font-weight: 400; }
+  .err { color: #e25555; padding: 10px; }
 </style>
 </head>
 <body>
-
 <header>
   <h1>CS Grading System</h1>
-  <p>Paste a gradebook CSV — table updates automatically</p>
+  <p>Paste a gradebook CSV — handles Individual or Collective layouts automatically</p>
 </header>
-
 <main>
   <div class="panel">
     <label class="drop" id="drop">
@@ -104,14 +100,17 @@
     <div class="or">— or paste CSV text below —</div>
     <textarea id="csv" placeholder="Paste your gradebook CSV here..."></textarea>
     <button onclick="run()">Load gradebook</button>
-    <button class="s" onclick="loadSample()">Load sample</button>
+    <button class="s" onclick="loadSample('individual')">Sample · Individual</button>
+    <button class="s" onclick="loadSample('collective')">Sample · Collective</button>
     <button class="s" onclick="document.getElementById('csv').value=''; document.getElementById('out').innerHTML='';">Clear</button>
   </div>
   <div id="out"></div>
 </main>
 
+<script src="parser.js"></script>
 <script>
-const SAMPLE = `,,,,,,,,,,,,,
+const SAMPLES = {
+  individual: `,,,,,,,,,,,,,
 ,,,,,,,,,,,,,
 ASSIGNMENT #1,D,Ab,Eg,,ASSIGNMENT #2,D,Eg,C,,ASSIGNMENT #3,D,C,Ab
 S1,D,A,A,,S1,A,A,A,,S1,A,A,P
@@ -123,110 +122,128 @@ S6,P,P,P,,S6,P,P,A,,S6,P,P,P
 S7,P,D,P,,S7,D,P,P,,S7,P,A,P
 S8,P,P,P,,S8,P,P,A,,S8,D,P,D
 S9,A,A,P,,S9,A,P,A,,S9,A,A,P
-S10,NY,D,P,,S10,D,NY,D,,S10,P,A,P`;
+S10,NY,D,P,,S10,D,NY,D,,S10,P,A,P`,
+  collective: `,D1,D2,D3,,C1,C2,,Eg1,Eg2,Eg3
+S1,D,A,A,,A,A,,A,P,A
+S2,P,A,A,,A,P,,A,A,P
+S3,A,P,P,,P,D,,P,D,P
+S4,A,A,A,,A,A,,A,A,D
+S5,P,A,A,,A,P,,P,P,P
+S6,P,P,P,,P,A,,P,P,P
+S7,P,D,P,,P,P,,A,P,P
+S8,P,P,P,,P,A,,P,D,D
+S9,A,A,P,,P,A,,A,A,P
+S10,NY,D,P,,NY,D,,P,A,P`
+};
 
-const POINTS = { A: 4, P: 3, D: 2, NY: 1 };
-
-function finalLetter(avg) {
-  if (avg >= 3.9) return 'A+'; if (avg >= 3.6) return 'A'; if (avg >= 3.3) return 'A-';
-  if (avg >= 3.0) return 'B+'; if (avg >= 2.7) return 'B'; if (avg >= 2.4) return 'B-';
-  if (avg >= 2.1) return 'C+'; if (avg >= 1.8) return 'C'; if (avg >= 1.5) return 'C-';
-  if (avg >= 1.3) return 'D+'; if (avg >= 1.1) return 'D';
-  return 'F';
-}
-
-function loadSample() { document.getElementById('csv').value = SAMPLE; run(); }
-
-function run() {
-  const rows = document.getElementById('csv').value.split('\n').map(l => l.split(',').map(c => c.trim()));
-  const hi = rows.findIndex(r => r.some(c => /assignment/i.test(c)));
-  const out = document.getElementById('out');
-  if (hi === -1) { out.innerHTML = '<div class="panel">No header row with "ASSIGNMENT" found.</div>'; return; }
-
-  // Parse header into assignment groups separated by blank columns
-  const groups = []; let cur = null;
-  rows[hi].forEach((c, i) => {
-    if (c === '') { if (cur) { groups.push(cur); cur = null; } }
-    else if (!cur) cur = { name: c, start: i, crit: [] };
-    else cur.crit.push(c);
-  });
-  if (cur) groups.push(cur);
-
-  // Collect each student's grades per assignment
-  const students = {};
-  rows.slice(hi + 1).filter(r => r.some(c => c)).forEach(r => {
-    groups.forEach(g => {
-      const sid = r[g.start]; if (!sid) return;
-      students[sid] = students[sid] || {};
-      students[sid][g.name] = g.crit.map((_, i) => r[g.start + 1 + i] || '');
-    });
-  });
-
-  // Compute finals + tally letter families (A/B/C/D/F)
-  const finals = {}, fam = { A:0, B:0, C:0, D:0, F:0 };
-  Object.keys(students).forEach(sid => {
-    let t = 0, n = 0;
-    groups.forEach(g => students[sid][g.name].forEach(v => {
-      const u = v.toUpperCase(); if (POINTS[u]) { t += POINTS[u]; n++; }
-    }));
-    const letter = n ? finalLetter(t / n) : '';
-    finals[sid] = { letter, score: n ? t / n : null };
-    if (letter) fam[letter.charAt(0)]++;
-  });
-
-  // Stats
-  let h = '<div class="stats">';
-  h += stat('Students', Object.keys(students).length);
-  h += stat('Assignments', groups.length);
-  ['A','B','C','D','F'].forEach(k => h += stat(k + ' range', fam[k]));
-  h += '</div>';
-
-  // Table
-  h += '<div class="table-wrap"><table><thead><tr>';
-  h += '<th rowspan="2">Student</th>';
-  groups.forEach(g => h += `<th class="assign" colspan="${g.crit.length}">${g.name}</th>`);
-  h += '<th rowspan="2" class="assign">Final</th></tr><tr>';
-  groups.forEach(g => g.crit.forEach(c => h += `<th class="crit">${c}</th>`));
-  h += '</tr></thead><tbody>';
-
-  Object.keys(students).forEach(sid => {
-    h += `<tr><td class="sid">${sid}</td>`;
-    groups.forEach(g => students[sid][g.name].forEach(v => {
-      const u = v.toUpperCase();
-      h += `<td>${u ? `<span class="g ${POINTS[u] ? u : 'blank'}">${u}</span>` : '<span class="g blank">—</span>'}</td>`;
-    }));
-    const f = finals[sid];
-    const sc = f.score !== null ? `<span class="score">${f.score.toFixed(2)} / 4.00</span>` : '';
-    const cls = f.letter ? 'f' + f.letter.charAt(0) : 'blank';
-    h += `<td class="final-cell"><span class="final ${cls}">${f.letter || '—'}</span>${sc}</td></tr>`;
-  });
-
-  h += '</tbody></table></div>';
-  out.innerHTML = h;
+function loadSample(kind) {
+  document.getElementById('csv').value = SAMPLES[kind] || SAMPLES.individual;
+  run();
 }
 
 function stat(label, value) {
   return `<div class="stat"><div class="stat-lbl">${label}</div><div class="stat-val">${value}</div></div>`;
 }
 
+function run() {
+  const csvText = document.getElementById('csv').value;
+  const out = document.getElementById('out');
+
+  let view;
+  try {
+    view = window.parseGradebook(csvText);
+  } catch (e) {
+    out.innerHTML = `<div class="panel err">Couldn't parse CSV: ${e.message}</div>`;
+    return;
+  }
+
+  if (view.layout === 'unknown' || view.students.length === 0) {
+    out.innerHTML = `<div class="panel err">
+      No gradebook detected. Expecting either<br>
+      &nbsp;&nbsp;• an <strong>ASSIGNMENT #N</strong> header row (Individual layout), or<br>
+      &nbsp;&nbsp;• compound headers like <strong>D1, D2, Eg1</strong> (Collective layout).
+    </div>`;
+    return;
+  }
+
+  const POINTS = window.GRADER.POINTS;
+
+  // Tally letter families A/B/C/D/F
+  const fam = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+  view.students.forEach((sid) => {
+    const l = view.finals[sid].letter;
+    if (l) fam[l.charAt(0)]++;
+  });
+
+  // Header stats
+  let h = '<div class="stats">';
+  h += stat(
+    'Layout',
+    `<span class="layout-pill">${view.layout}</span>`
+  );
+  h += stat('Students', view.students.length);
+  h += stat(view.layout === 'individual' ? 'Assignments' : 'Categories', view.groups.length);
+  ['A', 'B', 'C', 'D', 'F'].forEach((k) => h += stat(k + ' range', fam[k]));
+  h += '</div>';
+
+  // Table
+  h += '<div class="table-wrap"><table><thead><tr>';
+  h += '<th rowspan="2">Student</th>';
+  view.groups.forEach((g) => {
+    h += `<th class="assign" colspan="${g.subcols.length}">${g.label}</th>`;
+  });
+  h += '<th rowspan="2" class="assign">Final</th></tr><tr>';
+  view.groups.forEach((g) => {
+    g.subcols.forEach((sc) => { h += `<th class="crit">${sc}</th>`; });
+  });
+  h += '</tr></thead><tbody>';
+
+  view.students.forEach((sid) => {
+    h += `<tr><td class="sid">${sid}</td>`;
+    view.groups.forEach((g) => {
+      g.subcols.forEach((sc) => {
+        const v = (view.grades[sid] && view.grades[sid][g.label] && view.grades[sid][g.label][sc]) || '';
+        const u = String(v).toUpperCase();
+        if (u && POINTS[u] != null) {
+          h += `<td><span class="g ${u}">${u}</span></td>`;
+        } else if (u) {
+          // Recognized grade (e.g. NE, E, C, B, F) without points — show plain
+          h += `<td><span class="g blank">${u}</span></td>`;
+        } else {
+          h += `<td><span class="g blank">—</span></td>`;
+        }
+      });
+    });
+    const f = view.finals[sid];
+    const sc = f.score !== null ? `<span class="score">${f.score.toFixed(2)} / 4.00</span>` : '';
+    const cls = f.letter ? 'f' + f.letter.charAt(0) : 'blank';
+    h += `<td class="final-cell"><span class="final ${cls}">${f.letter || '—'}</span>${sc}</td></tr>`;
+  });
+  h += '</tbody></table></div>';
+
+  out.innerHTML = h;
+}
+
 // === File upload (click + drag/drop) ===
 const drop = document.getElementById('drop');
 const fileInput = document.getElementById('file');
-
 function readFile(file) {
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => { document.getElementById('csv').value = e.target.result; run(); };
+  reader.onload = (e) => { document.getElementById('csv').value = e.target.result; run(); };
   reader.readAsText(file);
 }
+fileInput.addEventListener('change', (e) => readFile(e.target.files[0]));
+['dragenter','dragover'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); })
+);
+['dragleave','drop'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); })
+);
+drop.addEventListener('drop', (e) => readFile(e.dataTransfer.files[0]));
 
-fileInput.addEventListener('change', e => readFile(e.target.files[0]));
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
-
-// Auto-load sample on page open
-loadSample();
+// Auto-load Individual sample on open
+loadSample('individual');
 </script>
 </body>
 </html>
