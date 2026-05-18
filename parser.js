@@ -1,14 +1,13 @@
 // =============================================================================
 // UNIVERSAL GRADEBOOK PARSER (JavaScript port of csv_reader.rb)
 //
-// Always organizes the output by OUTCOME (category) with per-assignment
-// subcolumns underneath — regardless of whether the source CSV used the
-// Individual or Collective layout.
+// Layout A — Individual Assessment
+//   Row N:   ASSIGNMENT #1 | D | Ab | Eg |  | ASSIGNMENT #2 | D | Eg | ...
+//   Row N+1: S1            | D | A  | A  |  | S1            | A | A  | ...
 //
-// Exposes:
-//   window.parseGradebook(csvText)
-//   window.GRADER.computeWeightedFinals(view, weights)
-//   window.GRADER.POINTS
+// Layout B — Collective Assessment
+//   Row N:   (blank) | D1 | D2 | D3 |  | C1 | C2 |  | Eg1 | ...
+//   Row N+1: S1      | D  | A  | A  |  | A  | A  |  | A   | ...
 // =============================================================================
 
 (function () {
@@ -27,7 +26,6 @@
   const isAssignmentTitle = (v) => present(v) && ASSIGNMENT_TITLE_PATTERN.test(v.trim());
   const isGradeValue      = (v) => present(v) && GRADE_PATTERN.test(v.trim());
 
-  // ---- CSV parsing ----------------------------------------------------------
   function parseCSV(text) {
     const rows = [];
     let row = [], field = '', inQuotes = false;
@@ -65,7 +63,6 @@
     return 'unknown';
   }
 
-  // ---- Layout A: Individual -------------------------------------------------
   function parseIndividual(rows) {
     const records = [];
     const headerIndices = [];
@@ -87,6 +84,7 @@
       for (let r = headerIdx + 1; r < rows.length; r++) {
         if (rows[r].some(isAssignmentTitle)) { dataEnd = r - 1; break; }
       }
+
       for (let r = headerIdx + 1; r <= dataEnd; r++) {
         const dataRow = rows[r];
         for (const colStr of Object.keys(colMap)) {
@@ -110,7 +108,6 @@
     return records;
   }
 
-  // ---- Layout B: Collective -------------------------------------------------
   function parseCollective(rows) {
     const records = [];
     const headerIdx = rows.findIndex((r) => r.some(isCompoundCell));
@@ -153,10 +150,6 @@
     return { layout: 'unknown', records: [] };
   }
 
-  // ---- Unified outcome-first view ------------------------------------------
-  // groups   : [{ label: <CATEGORY>, subcols: [<assignment label>] }]
-  // students : ordered list of student ids (S2 < S10)
-  // grades   : { sid: { categoryLabel: { assignmentLabel: grade } } }
   function buildView(layout, records) {
     const groups = [];
     const groupIdx = {};
@@ -165,8 +158,8 @@
     const grades = {};
 
     records.forEach((rec) => {
-      const groupLabel  = rec.category;     // ALWAYS group by outcome
-      const subcolLabel = rec.assignment;   // sub-column is the assignment
+      const groupLabel  = layout === 'individual' ? rec.assignment : rec.category;
+      const subcolLabel = layout === 'individual' ? rec.category   : rec.assignment;
 
       if (!(groupLabel in groupIdx)) {
         groupIdx[groupLabel] = groups.length;
@@ -188,14 +181,18 @@
       grades[rec.student][groupLabel][subcolLabel] = rec.grade;
     });
 
-    // Sort subcols within each group by the numeric part of the label.
-    // Works for both "ASSIGNMENT #3" and "D3".
     groups.forEach((g) => {
-      g.subcols.sort((a, b) => {
-        const na = parseInt((a.match(/(\d+)/) || ['0'])[1], 10);
-        const nb = parseInt((b.match(/(\d+)/) || ['0'])[1], 10);
-        return na - nb;
-      });
+      const allCompound = g.subcols.every((s) => COMPOUND_PATTERN.test(s));
+      if (allCompound) {
+        g.subcols.sort((a, b) => {
+          const ma = a.match(COMPOUND_PATTERN);
+          const mb = b.match(COMPOUND_PATTERN);
+          if (ma[1].toUpperCase() === mb[1].toUpperCase()) {
+            return parseInt(ma[2], 10) - parseInt(mb[2], 10);
+          }
+          return ma[1].localeCompare(mb[1]);
+        });
+      }
       delete g._seen;
     });
 
@@ -208,7 +205,6 @@
     return { layout, groups, students, grades };
   }
 
-  // ---- Grade scales ---------------------------------------------------------
   function finalLetter(avg) {
     if (avg >= 3.9) return 'A+';
     if (avg >= 3.6) return 'A';
@@ -224,21 +220,6 @@
     return 'F';
   }
 
-  // Per-student per-outcome average (point scale 0–4). Empty outcomes return null.
-  function outcomeAverages(view, sid) {
-    const out = {};
-    view.groups.forEach((g) => {
-      let total = 0, n = 0;
-      g.subcols.forEach((sub) => {
-        const v = view.grades[sid] && view.grades[sid][g.label] && view.grades[sid][g.label][sub];
-        if (v && POINTS[v] != null) { total += POINTS[v]; n++; }
-      });
-      out[g.label] = n > 0 ? total / n : null;
-    });
-    return out;
-  }
-
-  // Simple (unweighted) final — kept for backwards compatibility.
   function computeFinals(view) {
     const finals = {};
     view.students.forEach((sid) => {
@@ -252,31 +233,6 @@
     return finals;
   }
 
-  // Weighted final: average per outcome, then weighted average across outcomes.
-  // weights: { categoryLabel: number }. Missing/0 weights drop the outcome from
-  // the calculation. Outcomes the student has no grades for are also skipped.
-  function computeWeightedFinals(view, weights) {
-    const finals = {};
-    view.students.forEach((sid) => {
-      const avgs = outcomeAverages(view, sid);
-      let weightedSum = 0, weightSum = 0;
-      view.groups.forEach((g) => {
-        const w = weights && weights[g.label] != null ? Number(weights[g.label]) : 1;
-        if (!(w > 0)) return;
-        if (avgs[g.label] == null) return;
-        weightedSum += avgs[g.label] * w;
-        weightSum  += w;
-      });
-      const score = weightSum > 0 ? weightedSum / weightSum : null;
-      finals[sid] = {
-        letter: score !== null ? finalLetter(score) : '',
-        score,
-        outcomeAvgs: avgs,
-      };
-    });
-    return finals;
-  }
-
   function parseGradebook(csvText) {
     const rows = parseCSV(csvText);
     const { layout, records } = extractRecords(rows);
@@ -285,7 +241,7 @@
     return Object.assign({}, view, { finals, records, POINTS });
   }
 
-  const api = { parseGradebook, computeFinals, computeWeightedFinals, outcomeAverages, POINTS };
+  const api = { parseGradebook, POINTS };
 
   if (typeof window !== 'undefined') {
     window.parseGradebook = parseGradebook;
