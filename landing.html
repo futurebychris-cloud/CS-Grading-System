@@ -12,39 +12,21 @@
   header { padding: 22px 32px; border-bottom: 1px solid #2a313d; }
   header h1 { margin: 0; font-size: 20px; }
   header p { margin: 4px 0 0; color: #8a93a4; font-size: 13px; }
-  main {
-    padding: 24px 32px 64px; max-width: 1500px; margin: 0 auto;
-    display: grid; grid-template-columns: 280px 1fr; gap: 22px; align-items: start;
-  }
-  @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; }
-    .sidebar { position: static !important; }
-  }
-  .sidebar { position: sticky; top: 22px; display: flex; flex-direction: column; gap: 18px; }
+  main { padding: 24px 32px 64px; max-width: 1400px; margin: 0 auto; }
   .panel {
-    background: #181b22; border: 1px solid #2a313d; border-radius: 10px; padding: 18px;
+    background: #181b22; border: 1px solid #2a313d; border-radius: 10px;
+    padding: 18px; margin-bottom: 22px;
   }
-  .panel h3 {
-    margin: 0 0 12px; font-size: 12px; text-transform: uppercase;
-    letter-spacing: .5px; color: #8a93a4; font-weight: 600;
-  }
-  .panel p.hint { margin: -6px 0 12px; color: #8a93a4; font-size: 11px; }
   textarea {
     width: 100%; min-height: 110px; background: #1f242d; color: #e6e9ef;
     border: 1px solid #2a313d; border-radius: 6px; padding: 10px;
     font-family: ui-monospace, monospace; font-size: 12px; resize: vertical;
   }
-  input[type="search"], select, input[type="number"] {
-    background: #1f242d; color: #e6e9ef; border: 1px solid #2a313d;
-    border-radius: 6px; padding: 7px 9px; font-size: 13px; font-family: inherit;
-  }
-  input[type="search"], select { width: 100%; margin-bottom: 8px; }
   button {
     background: #6aa3ff; color: #0a0d12; border: 0; padding: 9px 18px;
     border-radius: 6px; font-weight: 600; cursor: pointer; margin: 10px 6px 0 0;
   }
   button.s { background: #1f242d; color: #e6e9ef; border: 1px solid #2a313d; }
-  button.s.full { width: 100%; margin: 8px 0 0; padding: 7px; font-size: 12px; }
   button:hover { filter: brightness(1.1); }
   .drop {
     border: 2px dashed #2a313d; border-radius: 8px; padding: 22px; text-align: center;
@@ -54,20 +36,6 @@
   .drop strong { color: #6aa3ff; }
   .drop input { display: none; }
   .or { text-align: center; color: #8a93a4; font-size: 12px; margin: 8px 0; }
-
-  /* Weight rows */
-  .weight-row {
-    display: grid; grid-template-columns: 44px 1fr 50px 36px;
-    gap: 8px; align-items: center; margin-bottom: 8px;
-  }
-  .weight-row .lbl { font-weight: 600; font-size: 13px; color: #6aa3ff; }
-  .weight-row input[type="range"] { width: 100%; accent-color: #6aa3ff; }
-  .weight-row input[type="number"] {
-    width: 100%; padding: 4px 6px; font-size: 12px; text-align: center;
-  }
-  .weight-row .pct { color: #8a93a4; font-size: 11px; text-align: right; }
-
-  /* Stats */
   .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
   .stat {
     flex: 1; min-width: 130px; background: #181b22; border: 1px solid #2a313d;
@@ -78,26 +46,23 @@
   .layout-pill {
     display: inline-block; padding: 3px 10px; border-radius: 999px;
     background: #1a2030; border: 1px solid #6aa3ff; color: #6aa3ff;
-    font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-left: 8px;
   }
-
-  /* Table */
   .table-wrap { background: #181b22; border: 1px solid #2a313d; border-radius: 10px; overflow: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     background: #1f242d; padding: 10px 12px; text-align: center;
-    border-bottom: 1px solid #2a313d; border-right: 1px solid #2a313d; font-weight: 600;
+    border-bottom: 1px solid #2a313d; border-right: 1px solid #2a313d;
+    font-weight: 600;
   }
-  thead .outcome { color: #6aa3ff; }
+  thead .assign { color: #6aa3ff; }
   thead .crit { color: #8a93a4; font-size: 11px; text-transform: uppercase; font-weight: 500; }
-  thead .crit.avg { color: #6aa3ff; }
   tbody td {
     padding: 8px 10px; text-align: center;
     border-bottom: 1px solid #2a313d; border-right: 1px solid #2a313d;
   }
   tbody tr:hover { background: rgba(106,163,255,.05); }
   tbody td.sid { font-weight: 600; text-align: left; background: #1f242d; }
-  tbody td.outcome-avg { background: #1a2030; font-weight: 600; color: #6aa3ff; }
   .g {
     display: inline-block; min-width: 32px; padding: 4px 8px; border-radius: 4px;
     font-weight: 600; font-size: 12px; color: #0a0d12;
@@ -119,50 +84,27 @@
   .fF { background: #e25555; color: #fff; }
   .score { display: block; font-size: 10px; color: #8a93a4; margin-top: 3px; font-weight: 400; }
   .err { color: #e25555; padding: 10px; }
-  .empty { color: #8a93a4; padding: 22px; text-align: center; font-size: 13px; }
 </style>
 </head>
 <body>
 <header>
   <h1>CS Grading System</h1>
-  <p>Load a gradebook CSV — table renders by outcome with per-assignment grades</p>
+  <p>Paste a gradebook CSV — handles Individual or Collective layouts automatically</p>
 </header>
 <main>
-  <aside class="sidebar">
-    <div class="panel">
-      <h3>Students</h3>
-      <input type="search" id="filter" placeholder="Filter by ID (e.g. S5)">
-      <select id="sortMode">
-        <option value="id-asc">Sort: ID (S1 → S10)</option>
-        <option value="id-desc">Sort: ID (S10 → S1)</option>
-        <option value="final-desc">Sort: Final (high → low)</option>
-        <option value="final-asc">Sort: Final (low → high)</option>
-      </select>
-    </div>
-
-    <div class="panel">
-      <h3>Outcome weights</h3>
-      <p class="hint">Drag a slider — final grades update instantly. Percentages shown reflect each outcome's share of the weighted total.</p>
-      <div id="weights"><div class="empty">Load a gradebook first.</div></div>
-      <button class="s full" onclick="resetWeights()">Reset to equal</button>
-    </div>
-  </aside>
-
-  <section>
-    <div class="panel">
-      <label class="drop" id="drop">
-        <input type="file" id="file" accept=".csv,text/csv">
-        Drop a <strong>.csv</strong> file here, or <strong>click to choose one</strong>
-      </label>
-      <div class="or">— or paste CSV text below —</div>
-      <textarea id="csv" placeholder="Paste your gradebook CSV here..."></textarea>
-      <button onclick="run()">Load gradebook</button>
-      <button class="s" onclick="loadSample('individual')">Sample · Individual</button>
-      <button class="s" onclick="loadSample('collective')">Sample · Collective</button>
-      <button class="s" onclick="document.getElementById('csv').value=''; state.view=null; renderSidebar(); document.getElementById('out').innerHTML='';">Clear</button>
-    </div>
-    <div id="out"></div>
-  </section>
+  <div class="panel">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".csv,text/csv">
+      Drop a <strong>.csv</strong> file here, or <strong>click to choose one</strong>
+    </label>
+    <div class="or">— or paste CSV text below —</div>
+    <textarea id="csv" placeholder="Paste your gradebook CSV here..."></textarea>
+    <button onclick="run()">Load gradebook</button>
+    <button class="s" onclick="loadSample('individual')">Sample · Individual</button>
+    <button class="s" onclick="loadSample('collective')">Sample · Collective</button>
+    <button class="s" onclick="document.getElementById('csv').value=''; document.getElementById('out').innerHTML='';">Clear</button>
+  </div>
+  <div id="out"></div>
 </main>
 
 <script src="parser.js"></script>
@@ -194,13 +136,6 @@ S9,A,A,P,,P,A,,A,A,P
 S10,NY,D,P,,NY,D,,P,A,P`
 };
 
-const state = {
-  view: null,
-  weights: {},      // { categoryLabel: number }
-  filter: '',
-  sortMode: 'id-asc'
-};
-
 function loadSample(kind) {
   document.getElementById('csv').value = SAMPLES[kind] || SAMPLES.individual;
   run();
@@ -210,18 +145,17 @@ function stat(label, value) {
   return `<div class="stat"><div class="stat-lbl">${label}</div><div class="stat-val">${value}</div></div>`;
 }
 
-function compareIds(a, b) {
-  const na = parseInt((a.match(/\d+/) || ['0'])[0], 10);
-  const nb = parseInt((b.match(/\d+/) || ['0'])[0], 10);
-  return na - nb;
-}
-
 function run() {
   const csvText = document.getElementById('csv').value;
   const out = document.getElementById('out');
+
   let view;
-  try { view = window.parseGradebook(csvText); }
-  catch (e) { out.innerHTML = `<div class="panel err">Couldn't parse CSV: ${e.message}</div>`; return; }
+  try {
+    view = window.parseGradebook(csvText);
+  } catch (e) {
+    out.innerHTML = `<div class="panel err">Couldn't parse CSV: ${e.message}</div>`;
+    return;
+  }
 
   if (view.layout === 'unknown' || view.students.length === 0) {
     out.innerHTML = `<div class="panel err">
@@ -232,174 +166,74 @@ function run() {
     return;
   }
 
-  state.view = view;
-  // initialize weights for any new outcome, drop weights for missing ones
-  view.groups.forEach(g => { if (state.weights[g.label] == null) state.weights[g.label] = 5; });
-  Object.keys(state.weights).forEach(k => {
-    if (!view.groups.find(g => g.label === k)) delete state.weights[k];
-  });
-
-  renderSidebar();
-  renderMain();
-}
-
-function renderSidebar() {
-  const wrap = document.getElementById('weights');
-  if (!state.view) {
-    wrap.innerHTML = '<div class="empty">Load a gradebook first.</div>';
-    return;
-  }
-  wrap.innerHTML = state.view.groups.map(g => `
-    <div class="weight-row" data-label="${g.label}">
-      <span class="lbl">${g.label}</span>
-      <input type="range" min="0" max="10" step="0.5" value="${state.weights[g.label]}">
-      <input type="number" min="0" max="10" step="0.5" value="${state.weights[g.label]}">
-      <span class="pct">0%</span>
-    </div>
-  `).join('');
-
-  // Wire up inputs (event delegation would also work)
-  wrap.querySelectorAll('.weight-row').forEach(row => {
-    const label = row.dataset.label;
-    const range = row.querySelector('input[type="range"]');
-    const num   = row.querySelector('input[type="number"]');
-    range.addEventListener('input', e => {
-      state.weights[label] = parseFloat(e.target.value) || 0;
-      num.value = e.target.value;
-      updatePercentages();
-      renderMain();
-    });
-    num.addEventListener('input', e => {
-      state.weights[label] = parseFloat(e.target.value) || 0;
-      range.value = Math.min(10, Math.max(0, parseFloat(e.target.value) || 0));
-      updatePercentages();
-      renderMain();
-    });
-  });
-
-  updatePercentages();
-}
-
-function updatePercentages() {
-  if (!state.view) return;
-  const total = state.view.groups.reduce((s, g) => s + (state.weights[g.label] || 0), 0);
-  document.querySelectorAll('.weight-row').forEach(row => {
-    const label = row.dataset.label;
-    const pct = total > 0 ? Math.round((state.weights[label] || 0) / total * 100) : 0;
-    row.querySelector('.pct').textContent = pct + '%';
-  });
-}
-
-function resetWeights() {
-  if (!state.view) return;
-  state.view.groups.forEach(g => state.weights[g.label] = 5);
-  renderSidebar();
-  renderMain();
-}
-
-function renderMain() {
-  const out = document.getElementById('out');
-  if (!state.view) { out.innerHTML = ''; return; }
-
-  const view = state.view;
   const POINTS = window.GRADER.POINTS;
-  const finals = window.GRADER.computeWeightedFinals(view, state.weights);
 
-  // Filter
-  const f = state.filter.trim().toLowerCase();
-  let students = view.students.slice();
-  if (f) students = students.filter(s => s.toLowerCase().includes(f));
-
-  // Sort
-  students.sort((a, b) => {
-    switch (state.sortMode) {
-      case 'id-desc':    return compareIds(b, a);
-      case 'final-desc': return (finals[b].score == null ? -1 : finals[b].score) - (finals[a].score == null ? -1 : finals[a].score);
-      case 'final-asc':  return (finals[a].score == null ? 999 : finals[a].score) - (finals[b].score == null ? 999 : finals[b].score);
-      case 'id-asc':
-      default:           return compareIds(a, b);
-    }
-  });
-
-  // Stats — tally the whole class, not just filtered
   const fam = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-  view.students.forEach(sid => { const l = finals[sid].letter; if (l) fam[l.charAt(0)]++; });
+  view.students.forEach((sid) => {
+    const l = view.finals[sid].letter;
+    if (l) fam[l.charAt(0)]++;
+  });
 
   let h = '<div class="stats">';
   h += stat('Layout', `<span class="layout-pill">${view.layout}</span>`);
-  h += stat('Students', students.length === view.students.length ? students.length : `${students.length} / ${view.students.length}`);
-  h += stat('Outcomes', view.groups.length);
-  ['A','B','C','D','F'].forEach(k => h += stat(k + ' range', fam[k]));
+  h += stat('Students', view.students.length);
+  h += stat(view.layout === 'individual' ? 'Assignments' : 'Categories', view.groups.length);
+  ['A', 'B', 'C', 'D', 'F'].forEach((k) => h += stat(k + ' range', fam[k]));
   h += '</div>';
 
-  // Table: outcomes as top header, sub: each assignment + outcome avg
   h += '<div class="table-wrap"><table><thead><tr>';
   h += '<th rowspan="2">Student</th>';
-  view.groups.forEach(g => {
-    const span = g.subcols.length + 1; // +1 for outcome avg
-    h += `<th class="outcome" colspan="${span}">${g.label}</th>`;
+  view.groups.forEach((g) => {
+    h += `<th class="assign" colspan="${g.subcols.length}">${g.label}</th>`;
   });
-  h += '<th rowspan="2" class="outcome">Final</th></tr><tr>';
-  view.groups.forEach(g => {
-    g.subcols.forEach(sc => { h += `<th class="crit">${sc}</th>`; });
-    h += `<th class="crit avg">avg</th>`;
+  h += '<th rowspan="2" class="assign">Final</th></tr><tr>';
+  view.groups.forEach((g) => {
+    g.subcols.forEach((sc) => { h += `<th class="crit">${sc}</th>`; });
   });
   h += '</tr></thead><tbody>';
 
-  students.forEach(sid => {
+  view.students.forEach((sid) => {
     h += `<tr><td class="sid">${sid}</td>`;
-    view.groups.forEach(g => {
-      let total = 0, n = 0;
-      g.subcols.forEach(sc => {
-        const v = view.grades[sid] && view.grades[sid][g.label] && view.grades[sid][g.label][sc];
-        const u = v ? String(v).toUpperCase() : '';
+    view.groups.forEach((g) => {
+      g.subcols.forEach((sc) => {
+        const v = (view.grades[sid] && view.grades[sid][g.label] && view.grades[sid][g.label][sc]) || '';
+        const u = String(v).toUpperCase();
         if (u && POINTS[u] != null) {
           h += `<td><span class="g ${u}">${u}</span></td>`;
-          total += POINTS[u]; n++;
         } else if (u) {
           h += `<td><span class="g blank">${u}</span></td>`;
         } else {
           h += `<td><span class="g blank">—</span></td>`;
         }
       });
-      const avg = n > 0 ? (total / n).toFixed(2) : '—';
-      h += `<td class="outcome-avg">${avg}</td>`;
     });
-    const fin = finals[sid];
-    const sc = fin.score !== null ? `<span class="score">${fin.score.toFixed(2)} / 4.00</span>` : '';
-    const cls = fin.letter ? 'f' + fin.letter.charAt(0) : 'blank';
-    h += `<td class="final-cell"><span class="final ${cls}">${fin.letter || '—'}</span>${sc}</td></tr>`;
+    const f = view.finals[sid];
+    const sc = f.score !== null ? `<span class="score">${f.score.toFixed(2)} / 4.00</span>` : '';
+    const cls = f.letter ? 'f' + f.letter.charAt(0) : 'blank';
+    h += `<td class="final-cell"><span class="final ${cls}">${f.letter || '—'}</span>${sc}</td></tr>`;
   });
   h += '</tbody></table></div>';
 
   out.innerHTML = h;
 }
 
-// Filter + sort listeners
-document.getElementById('filter').addEventListener('input', e => {
-  state.filter = e.target.value;
-  renderMain();
-});
-document.getElementById('sortMode').addEventListener('change', e => {
-  state.sortMode = e.target.value;
-  renderMain();
-});
-
-// File upload
 const drop = document.getElementById('drop');
 const fileInput = document.getElementById('file');
 function readFile(file) {
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => { document.getElementById('csv').value = e.target.result; run(); };
+  reader.onload = (e) => { document.getElementById('csv').value = e.target.result; run(); };
   reader.readAsText(file);
 }
-fileInput.addEventListener('change', e => readFile(e.target.files[0]));
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
+fileInput.addEventListener('change', (e) => readFile(e.target.files[0]));
+['dragenter','dragover'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); })
+);
+['dragleave','drop'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); })
+);
+drop.addEventListener('drop', (e) => readFile(e.dataTransfer.files[0]));
 
-// Boot with the Individual sample loaded
 loadSample('individual');
 </script>
 </body>
